@@ -158,8 +158,6 @@ class GeoData:
             if row_a.geometry.centroid.within(row_b.geometry):  # pyright: ignore
                 df.loc[row_a.Index, "has_context"] = True  # pyright: ignore
                 df.loc[row_b.Index, "has_context"] = True  # pyright: ignore
-            else:
-                continue
 
         return df
 

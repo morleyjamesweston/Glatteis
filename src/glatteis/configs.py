@@ -22,7 +22,7 @@ class Configs:
 
 DEFAULT_CONFIGS = {
     "de": Configs(language=Language.DE, library=Library.SPACY, model="de_core_news_lg"),
-    "fr": Configs(language=Language.DE, library=Library.SPACY, model="fr_core_news_lg"),
+    "fr": Configs(language=Language.FR, library=Library.SPACY, model="fr_core_news_lg"),
 }
 
 
