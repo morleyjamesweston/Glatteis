@@ -107,5 +107,5 @@ def test_add_gaz():
 
     assert(geodata._candidate_exists("DUMMY_PLACE_NAME") == 0)
 
-    # tests __repr__
+    # This tests __repr__
     assert(print(geodata) is None)

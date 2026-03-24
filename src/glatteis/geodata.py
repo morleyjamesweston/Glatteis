@@ -1,11 +1,9 @@
 from itertools import permutations
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Iterable, Set
 import flashtext
 import geopandas as gpd
 import pandas as pd
-import re
-from typing import Iterable, Set
-
+from .utils import standardize_name
 
 GEO_STOPWORD_PRESETS = [
     "CANTONE ",
@@ -28,6 +26,7 @@ GEO_STOPWORD_PRESETS = [
     "D'",
 ]
 
+
 class GeoData:
     def __init__(self) -> None:
         self.gazetteers: Dict[str, gpd.GeoDataFrame] = {}
@@ -47,17 +46,6 @@ class GeoData:
     def _candidate_exists(self, candidate: str) -> bool:
         cands = self.keywords.extract_keywords(candidate)
         return len(cands) > 0
-
-    def _standardize_name(self, name: str, geographical_stopwords: Set[str]) -> str:
-        name = name.casefold()
-        name = name.upper()
-        for n in geographical_stopwords:
-            name = name.removeprefix(n)
-            name = name.strip()
-        name = re.sub(r"(\(.*\))", "", name)
-        name = re.sub(r"\s+", " ", name)
-        name = name.strip()
-        return name
 
     def add_gazetteer(
         self,
@@ -81,9 +69,9 @@ class GeoData:
         simplified_gdf = gdf.copy(deep=True)
 
         # removes null name rows
-        simplified_gdf= simplified_gdf[simplified_gdf[names_col].notnull()]
+        simplified_gdf = simplified_gdf[simplified_gdf[names_col].notnull()]
         if type(simplified_gdf) is not gpd.GeoDataFrame:
-            raise ValueError('')
+            raise ValueError("")
 
         simplified_gdf = simplified_gdf.to_crs("EPSG:4326")
 
@@ -107,7 +95,7 @@ class GeoData:
 
         # sets standardized name column
         simplified_gdf["standardized_names"] = [
-            self._standardize_name(n, self.stopwords) for n in simplified_gdf[names_col]
+            standardize_name(n, self.stopwords) for n in simplified_gdf[names_col]
         ]
 
         # # only gets needed columns for slim gazetteer
@@ -133,7 +121,7 @@ class GeoData:
                 admin_rank: "admin_rank",
                 population_column: "population_column",
             },
-            inplace=True
+            inplace=True,
         )
 
         simplified_gdf["gazetteer_name"] = gazetteer_name
@@ -147,6 +135,33 @@ class GeoData:
 
         self._add_keywords(simplified_gdf["original_names"].tolist())
         self._add_keywords(simplified_gdf["standardized_names"].tolist())
+
+    def get_candidates(self, candidates: List[str]) -> gpd.GeoDataFrame | None:
+        # candidates = [c for c in text if self._candidate_exists(c)]
+
+        df = self.slim_gazetteer[
+            self.slim_gazetteer["standardized_names"].isin(candidates)
+        ]
+
+        if df is None or df.empty or type(df) is not gpd.GeoDataFrame:
+            return None
+
+        df["has_context"] = False
+
+        for row_a, row_b in permutations(df.itertuples(), 2):
+            if row_a.standardized_names == row_b.standardized_names:  # pyright: ignore
+                continue
+            if not row_b.is_contextual:  # pyright: ignore
+                continue
+            if row_a.admin_rank <= row_b.admin_rank:  # pyright: ignore
+                continue
+            if row_a.geometry.centroid.within(row_b.geometry):  # pyright: ignore
+                df.loc[row_a.Index, "has_context"] = True  # pyright: ignore
+                df.loc[row_b.Index, "has_context"] = True  # pyright: ignore
+            else:
+                continue
+
+        return df
 
     def __repr__(self) -> str:
         return f"GeoData( gazetteers: {len(self.gazetteers)}, locations: {len(self.keywords)})"

@@ -11,3 +11,8 @@ wheels/
 
 # Testing
 .coverage
+
+
+# Benchmarks: temp
+benchmarks/
+tests/test_data/
