@@ -1,12 +1,11 @@
 import geopandas as gpd
 import pytest
 
-from glatteis import Configs, GeoParser
-from glatteis.configs import Language, Library
+from glatteis import GeoParser
 
 
 def test_de_defaults():
-    geoparser = GeoParser(language_code="de")
+    geoparser = GeoParser(language="de")
     ne_countries = gpd.read_file("./tests/test_data/ne_10m_admin_0_countries.zip")
 
     geoparser.add_gazetteer(
@@ -48,15 +47,16 @@ def test_de_defaults():
 
 
 def test_empty():
-    geoparser = GeoParser(language_code="de")
+    geoparser = GeoParser(language="de")
     text = "Berlin"
     with pytest.raises(Exception):
         geoparser.parse(text)
 
 
 def test_de_stanza():
-    conf = Configs(language=Language.DE, library=Library.STANZA, model="de")
-    geoparser = GeoParser(language_code="de", configs=conf)
+    geoparser = GeoParser(
+        language="de", recognition_library="stanza", recognition_model="de"
+    )
 
     ne_countries = gpd.read_file("./tests/test_data/ne_10m_admin_0_countries.zip")
 
@@ -99,7 +99,7 @@ def test_de_stanza():
 
 
 def test_multi_gaz():
-    geoparser = GeoParser(language_code="de")
+    geoparser = GeoParser(language="de")
     ne_countries = gpd.read_file("./tests/test_data/ne_10m_admin_0_countries.zip")
 
     geoparser.add_gazetteer(

@@ -4,9 +4,9 @@ import spacy
 
 
 class SpacyNLP:
-    def __init__(self, spacy_language_model) -> None:
+    def __init__(self, model) -> None:
 
-        self.nlp = spacy.load(name=spacy_language_model)
+        self.nlp = spacy.load(name=model)
 
     def __call__(self, text: str) -> List[str]:
         doc = self.nlp(text)

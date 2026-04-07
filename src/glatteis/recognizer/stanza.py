@@ -2,12 +2,10 @@ from typing import List
 
 
 class StanzaNLP:
-    def __init__(self, stanza_language_model) -> None:
+    def __init__(self, model) -> None:
         import stanza
 
-        self.nlp = stanza.Pipeline(
-            stanza_language_model, processors="tokenize, ner", use_gpu=False
-        )
+        self.nlp = stanza.Pipeline(model, processors="tokenize, ner", use_gpu=False)
 
     def __call__(self, text: str) -> List[str]:
         candidates = []
