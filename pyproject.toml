@@ -29,6 +29,8 @@ addopts = "--cov=glatteis"
 
 [dependency-groups]
 dev = [
+    "ipykernel>=7.2.0",
+    "matplotlib>=3.10.8",
     "pytest>=9.0.2",
     "pytest-cov>=7.1.0",
 ]

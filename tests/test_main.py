@@ -1,14 +1,13 @@
-import pytest
 import geopandas as gpd
+import pytest
 
-from glatteis import GeoParser, Configs
-from glatteis.configs import Library, Language
+from glatteis import Configs, GeoParser
+from glatteis.configs import Language, Library
 
 
 def test_de_defaults():
     geoparser = GeoParser(language_code="de")
     ne_countries = gpd.read_file("./tests/test_data/ne_10m_admin_0_countries.zip")
-
 
     geoparser.add_gazetteer(
         gdf=ne_countries,
@@ -40,12 +39,13 @@ def test_de_defaults():
 
     assert result is not None
     if result is not None:
-        names = result['original_names'].to_list()
+        names = result["original_names"].to_list()
         assert "Iran" in names
 
     text = ""
     result = geoparser.parse(text)
     assert result is None
+
 
 def test_empty():
     geoparser = GeoParser(language_code="de")
@@ -60,8 +60,6 @@ def test_de_stanza():
 
     ne_countries = gpd.read_file("./tests/test_data/ne_10m_admin_0_countries.zip")
 
-
-
     geoparser.add_gazetteer(
         gdf=ne_countries,
         gazetteer_name="natural_earth_countries",
@@ -92,7 +90,7 @@ def test_de_stanza():
 
     assert result is not None
     if result is not None:
-        names = result['original_names'].to_list()
+        names = result["original_names"].to_list()
         assert "Iran" in names
 
     text = ""
@@ -113,7 +111,6 @@ def test_multi_gaz():
         admin_rank=0,
         is_contextual=True,
     )
-
 
     cantons = gpd.read_file("./tests/test_data/swiss_govt_data/cantons.geojson")
     cantons = cantons.to_crs("EPSG:4326")
@@ -139,7 +136,6 @@ def test_multi_gaz():
         admin_rank=2,
         is_contextual=False,
     )
-
 
     munis = gpd.read_file("./tests/test_data/swiss_govt_data/municipalities.geojson")
     munis = munis.to_crs("EPSG:4326")
